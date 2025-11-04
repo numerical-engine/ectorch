@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import sys
 
 from ectorch.core.population import Population
 
@@ -10,13 +9,10 @@ class Function:
 
     Attributes:
         net (nn.Module): The neural network to evaluate.
-        converter (callable): A function that converts individuals to network inputs.
-                            The output of the converter must be a tuple of torch.Tensor and be same with the input of the network.
     """
-    def __init__(self, net:nn.Module, converter:callable)->None:
+    def __init__(self, net:nn.Module)->None:
         self.net = net
         self.net.eval()
-        self.converter = converter
     
     def to(self, device:str)->None:
         self.net.to(device)
@@ -29,11 +25,21 @@ class Function:
         Returns:
             torch.Tensor: The fitness values of the population.
         """
-        inputs = self.converter(population.individuals)
+        inputs = self.convert(population.individuals)
         with torch.no_grad():
             outputs = self.net(*inputs)
         
         return self.forward(outputs)
+    
+    def convert(self, individuals:torch.Tensor)->tuple:
+        """Converts individuals to network inputs.
+
+        Args:
+            individuals (torch.Tensor): The individuals to convert. Shape is (N, M), where N is the number of individuals and M is the individual dimension.
+        Returns:
+            tuple: The converted inputs for the network.
+        """
+        raise NotImplementedError
     
     def forward(self, outputs:torch.Tensor)->torch.Tensor:
         """Compute the fitness values from the network outputs.

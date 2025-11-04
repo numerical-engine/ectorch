@@ -18,6 +18,11 @@ class Population:
         self.penalty = penalty
         self.score = score
     
+    def reset(self)->None:
+        self.fitness = None
+        self.penalty = None
+        self.score = None
+    
     @property
     def device(self)->str:
         return self.individuals.device
@@ -45,7 +50,7 @@ class Population:
     def already_fit(self)->bool:
         return (self.fitness is not None) and (self.penalty is not None)
     
-    def copy(self)->'Population':
+    def copy(self)->"Population":
         return Population(
             individuals = self.individuals.clone(),
             generation = self.generation,
