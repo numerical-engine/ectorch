@@ -109,3 +109,26 @@ class Population:
             penalty=self.penalty.clone() if self.penalty is not None else None,
             score=self.score.clone() if self.score is not None else None,
         )
+
+    def index_select(self, indices:torch.Tensor)->'Population':
+        """Creates a new population by selecting individuals at the specified indices.
+
+        Args:
+            indices (torch.Tensor): A tensor of shape (new_population_size,) containing the indices of individuals to select.
+        Returns:
+            Population: A new Population object containing only the selected individuals.
+        """
+        new_variables = {var_type: value.index_select(0, indices) for var_type, value in self.variables.items()}
+        new_age = self.age.index_select(0, indices)
+        new_fitness = self.fitness.index_select(0, indices) if self.fitness is not None else None
+        new_penalty = self.penalty.index_select(0, indices) if self.penalty is not None else None
+        new_score = self.score.index_select(0, indices) if self.score is not None else None
+
+        return Population(
+            variables=new_variables,
+            age=new_age,
+            generation=self.generation,
+            fitness=new_fitness,
+            penalty=new_penalty,
+            score=new_score,
+        )

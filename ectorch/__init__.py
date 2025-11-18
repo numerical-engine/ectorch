@@ -8,5 +8,7 @@ from ectorch.core.mutation import Mutation
 from ectorch import mutation
 from ectorch.core.crossover import Crossover
 from ectorch import crossover
+from ectorch.core.selection import Selection
+from ectorch import selection
 
 __version__ = "0.1.0"
