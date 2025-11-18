@@ -14,21 +14,19 @@ class Sphere(ectorch.Function):
     def forward(self, *outputs:torch.Tensor)->torch.Tensor:
         return torch.sum(outputs[0], dim=1)
 
-population_num = 3
+population_num = 10
 vars = {
     "R": torch.randn(population_num, 2),
     "B": torch.randint(0, 2, (population_num, 2), dtype=torch.float32),
     "Z": torch.randint(-2, 3, (population_num, 2), dtype=torch.float32),
 }
-
-
 population = ectorch.Population(variables=vars)
 population.to("cuda")
 net = Net().to("cuda")
 function = Sphere(net=net)
 xl = torch.tensor([-5.0, -5.0], device="cuda")
 xu = torch.tensor([5.0, 5.0], device="cuda")
-mut = ectorch.mutation.integer.ResetMutation(xl=xl, xu=xu, p=0.5)
-print(population.variables["Z"])
-new_population = mut(population)
-print(new_population.variables["Z"])
+c = ectorch.crossover.real.BLXAlphaCrossover(alpha=0.3, xl=xl, xu=xu)
+print(population.variables["R"])
+offspring = c(parents=population)
+print(offspring.variables["R"])

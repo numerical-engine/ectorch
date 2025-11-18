@@ -23,11 +23,13 @@ class Function:
         """
         self.net.to(device)
 
-    def convert(self, population:'Population')->torch.Tensor:
+    def convert(self, variables:dict[str, torch.Tensor])->torch.Tensor:
         """Converts the individuals tensor to the input format required by the network.
 
         Args:
-            population (Population): The population object.
+            variables (dict[str, torch.Tensor]): A dictionary containing the variables of the individuals.
+                - Keys are variable types in config.var_keys.
+                - Values are tensors of shape (population_size, var_dim).
         Returns:
             torch.Tensor: The converted tensor suitable for the network input.
         Note:
@@ -52,8 +54,10 @@ class Function:
             population (Population): The population to be evaluated.
         Returns:
             torch.Tensor: The fitness tensor of shape (population_size,)
+        Note:
+            - When this method calculates the network outputs, the batch size is equal to the population size.
         """
-        inputs = self.convert(population)
+        inputs = self.convert(population.variables)
         with torch.no_grad():
             outputs = self.net(inputs)
         
