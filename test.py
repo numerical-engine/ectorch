@@ -9,10 +9,18 @@ class Net(nn.Module):
 
 class Sphere(ectorch.Function):
     def convert(self, individuals:torch.Tensor)->torch.Tensor:
-        return individuals
+        return individuals["R"]
     
     def forward(self, *outputs:torch.Tensor)->torch.Tensor:
         return torch.sum(outputs[0], dim=1)
+
+class Env(ectorch.Environment):
+    def __init__(self, function:ectorch.Function)->None:
+        super().__init__(functions=[function], penalty_functions=None)
+    
+    def get_score(self, population:"Population")->torch.Tensor:
+        return torch.sum(population.fitness, dim = 1)
+
 
 population_num = 10
 vars = {
@@ -25,13 +33,7 @@ population = ectorch.Population(variables=vars)
 population.to("cuda")
 net = Net().to("cuda")
 function = Sphere(net=net)
-xl = torch.tensor([-5.0, -5.0], device="cuda")
-xu = torch.tensor([5.0, 5.0], device="cuda")
-population.penalty = torch.zeros(population_num, 1, device="cuda")
-population.fitness = torch.randn(population_num, 1, device="cuda")
-population.score = population.fitness[:,0] + population.penalty[:,0]
-
-selection = ectorch.selection.TournamentSelection()
-print(population.score)
-selected_population = selection(population, 2)
-print(selected_population.score)
+environment = Env(function=function)
+environment.run(population)
+population.sort()
+print("Score:\n", population.score)

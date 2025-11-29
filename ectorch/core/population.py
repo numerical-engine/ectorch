@@ -83,7 +83,7 @@ class Population:
         Returns:
             bool: True if the population has been evaluated, False otherwise.
         """
-        return (self.fitness is not None) and (self.penalty is not None)
+        return self.fitness is not None
     
     @property
     def already_scored(self)->bool:
@@ -110,6 +110,13 @@ class Population:
             score=self.score.clone() if self.score is not None else None,
         )
 
+    def reset(self)->None:
+        """Resets the fitness, penalty, and score attributes of the population to None.
+        """
+        self.fitness = None
+        self.penalty = None
+        self.score = None
+
     def index_select(self, indices:torch.Tensor)->'Population':
         """Creates a new population by selecting individuals at the specified indices.
 
@@ -132,3 +139,16 @@ class Population:
             penalty=new_penalty,
             score=new_score,
         )
+    
+    def sort(self)->None:
+        """Sorts the population in-place based on the score in upper descending order.
+
+        Individuals with higher scores will appear first in the population.
+        """
+        assert self.already_scored, "Population must be scored before sorting."
+        sorted_indices = torch.argsort(self.score, descending=True)
+        self.variables = {var_type: value.index_select(0, sorted_indices) for var_type, value in self.variables.items()}
+        self.age = self.age.index_select(0, sorted_indices)
+        self.fitness = self.fitness.index_select(0, sorted_indices) if self.fitness is not None else None
+        self.penalty = self.penalty.index_select(0, sorted_indices) if self.penalty is not None else None
+        self.score = self.score.index_select(0, sorted_indices)

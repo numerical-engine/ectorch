@@ -10,5 +10,9 @@ from ectorch.core.crossover import Crossover
 from ectorch import crossover
 from ectorch.core.selection import Selection
 from ectorch import selection
+from ectorch.core.environment import Environment
+from ectorch.core.survival import Survival
+from ectorch import survival
+from ectorch.core.optimizer import Optimizer
 
 __version__ = "0.1.0"

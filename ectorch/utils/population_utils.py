@@ -34,3 +34,43 @@ def check_variables(variables:dict[str, torch.Tensor])->bool:
             print(f"All variable values should have the same population size. Mismatch found in variable type {var_type}.", file=sys.stderr)
             return False
     return True
+
+
+def cat(population_list:list['Population'])->'Population':
+    """Concatenates a list of Population instances into a single Population.
+
+    Args:
+        population_list (list[Population]): A list of Population instances to concatenate.
+    Returns:
+        Population: A new Population instance containing all individuals from the input populations.
+    """
+    assert len(population_list) > 0, "The population list should not be empty."
+
+    new_generation = max(pop.generation for pop in population_list)
+    
+    variables = {}
+    for var_type in population_list[0].variables.keys():
+        variables[var_type] = torch.cat([pop.variables[var_type] for pop in population_list], dim=0)
+    
+    age = torch.cat([pop.age for pop in population_list], dim=0)
+    
+    fitness = None
+    if population_list[0].fitness is not None:
+        fitness = torch.cat([pop.fitness for pop in population_list], dim=0)
+    
+    penalty = None
+    if population_list[0].penalty is not None:
+        penalty = torch.cat([pop.penalty for pop in population_list], dim=0)
+    
+    score = None
+    if population_list[0].score is not None:
+        score = torch.cat([pop.score for pop in population_list], dim=0)
+    
+    return type(population_list[0])(
+        variables=variables,
+        generation=new_generation,
+        age=age,
+        fitness=fitness,
+        penalty=penalty,
+        score=score,
+    )
