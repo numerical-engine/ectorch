@@ -86,6 +86,16 @@ class Population:
         return self.fitness is not None
     
     @property
+    def already_penalized(self)->bool:
+        """Checks if the population has been penalized.
+
+        If the penalty attribute is not None, it indicates that the population has been penalized.
+        Returns:
+            bool: True if the population has been penalized, False otherwise.
+        """
+        return self.penalty is not None
+    
+    @property
     def already_scored(self)->bool:
         """Checks if the population has been scored.
 
@@ -152,3 +162,27 @@ class Population:
         self.fitness = self.fitness.index_select(0, sorted_indices) if self.fitness is not None else None
         self.penalty = self.penalty.index_select(0, sorted_indices) if self.penalty is not None else None
         self.score = self.score.index_select(0, sorted_indices)
+    
+    def age_sort(self)->None:
+        """Sorts the population in-place based on the age in ascending order.
+
+        Individuals with lower ages will appear first in the population.
+        """
+        sorted_indices = torch.argsort(self.age, descending=False)
+        self.variables = {var_type: value.index_select(0, sorted_indices) for var_type, value in self.variables.items()}
+        self.age = self.age.index_select(0, sorted_indices)
+        self.fitness = self.fitness.index_select(0, sorted_indices) if self.fitness is not None else None
+        self.penalty = self.penalty.index_select(0, sorted_indices) if self.penalty is not None else None
+        self.score = self.score.index_select(0, sorted_indices) if self.score is not None else None
+    
+    def shuffle(self)->None:
+        """Shuffles the population in-place.
+
+        The order of individuals in the population will be randomly permuted.
+        """
+        shuffled_indices = torch.randperm(len(self), device=self.device)
+        self.variables = {var_type: value.index_select(0, shuffled_indices) for var_type, value in self.variables.items()}
+        self.age = self.age.index_select(0, shuffled_indices)
+        self.fitness = self.fitness.index_select(0, shuffled_indices) if self.fitness is not None else None
+        self.penalty = self.penalty.index_select(0, shuffled_indices) if self.penalty is not None else None
+        self.score = self.score.index_select(0, shuffled_indices) if self.score is not None else None

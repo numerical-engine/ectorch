@@ -14,5 +14,7 @@ from ectorch.core.environment import Environment
 from ectorch.core.survival import Survival
 from ectorch import survival
 from ectorch.core.optimizer import Optimizer
+from ectorch import utils
+
 
 __version__ = "0.1.0"
